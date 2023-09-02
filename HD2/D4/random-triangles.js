@@ -3,8 +3,9 @@
 var gl;
 var points;
 
-var NumPoints = 100;
-
+var NumPoints = 500000;
+var colorLoc;
+var points = []
 window.onload = function init()
 {
     var canvas = document.getElementById( "gl-canvas" );
@@ -18,33 +19,30 @@ window.onload = function init()
 
     // First, initialize the corners of our gasket with three points.
 
-    var vertices = [
-        vec2( -1, -1 ),
-        vec2(  0,  1 ),
-        vec2(  1, -1 )
-    ];
 
-    // Specify a starting point p for our iterations
-    // p must lie inside any set of three vertices
 
-/*     var u = add( vertices[0], vertices[1] );
-    var v = add( vertices[0], vertices[2] );
-    var p = scale( 0.25, add( u, v ) );
- */
+
+    for (var i = 0; i < 100; ++i ) {
+        var initialPoint = [Math.random() * 2 - 1,Math.random() * 2 - 1] //bottom left of upright triangle
+        var rightPoint = [initialPoint[0]+0.1 ,initialPoint[1]]
+        var topPoint = [(initialPoint[0] + rightPoint[0])/2,initialPoint[1]+0.1 ]
+        points.push(initialPoint[0])
+        points.push(initialPoint[1])
+        points.push(rightPoint[0])
+        points.push(rightPoint[1])
+        points.push(topPoint[0])
+        points.push(topPoint[1])
+    }
+    console.log( points.length)
+
     // And, add our initial point into our array of points
-    var p = [100,100]
-    points = [ p ];
+
+    //points = [ vertices ];
 
     // Compute new points
     // Each new point is located midway between
     // last point and a randomly chosen vertex
 
-    for ( var i = 0; points.length < NumPoints; ++i ) {
-        var j = Math.floor(Math.random() * 3);
-        p = add( points[i], vertices[j] );
-        p = scale( 0.5, p );
-        points.push( p );
-    }
 
     //
     //  Configure WebGL
@@ -68,6 +66,7 @@ window.onload = function init()
     var vPosition = gl.getAttribLocation( program, "vPosition" );
     gl.vertexAttribPointer( vPosition, 2, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vPosition );
+    colorLoc = gl.getUniformLocation( program, "fColor" );
 
     render();
 };
@@ -75,5 +74,10 @@ window.onload = function init()
 
 function render() {
     gl.clear( gl.COLOR_BUFFER_BIT );
-    gl.drawArrays( gl.POINTS, 0, points.length );
+
+    for (var i = 0; i < points.length+1; i +=3 ) {
+        gl.uniform4fv( colorLoc, vec4(Math.random(), Math.random(), Math.random(), 1.0) );
+        gl.drawArrays( gl.TRIANGLES, i,3);
+    };      
+
 }
